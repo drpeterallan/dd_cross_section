@@ -10,43 +10,13 @@ Brief description of script
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
-import pandas as pd
-from PAProcessing.pysrc.utils.plotting import set_rcParams
-
-
-def get_data(path_to_file):
-    data = pd.read_csv(path_to_file, header=0, delimiter=",")
-    energy = np.array(data.iloc[:, 0].values)
-    s_factor = np.array(data.iloc[:, 1].values)
-    s_factor_error = np.array(data.iloc[:, 2].values)
-
-    header = list(data.head())
-    if header[1].split(".")[0].split("[")[1] == "keV":
-        s_factor /= 1e3
-        s_factor_error /= 1e3
-
-    return energy, s_factor, s_factor_error
-
-
-def sort_data(x_array, y_array, y_error):
-
-    """
-    Function to sort to one array based on order of another
-    Data thief don't click on points in increasing order this will rearrange based on energy
-    """
-    y_array_sort = [x for _, x in sorted(zip(x_array, y_array))]
-    y_error_sort = [x for _, x in sorted(zip(x_array, y_error))]
-    x_array_sort = sorted(x_array)
-
-    return x_array_sort, y_array_sort, y_error_sort
+from dd_cross_section.pysrc.utils import get_processed_data, sort_data
 
 
 def main():
 
-    set_rcParams()
-    _, ax = plt.subplots(figsize=(8, 6))
-
-    working_directory = "/home/peter/data/pa_data/dd_cross_section_work/data/dd_n3he/"
+    repo_location = "/home/peter/code/src/python_code/"
+    path_to_data = repo_location + "dd_cross_section/data/processed/dd_n3He/"
 
     data_files = {
                   "Arnold (1954)": "dd_n3he_s_factor_fig13_arnold_data_combined.csv",
@@ -69,7 +39,8 @@ def main():
                   "Erickson (1949)": "dd_n3he_s_factor_fig25_erickson_data_combined.csv"
                  }
 
-    # Create colour map for plotting
+    # Plotting setup
+    _, ax = plt.subplots(figsize=(8, 6))
     cmap = cm.get_cmap("jet")
     plt_colours = [cmap(i) for i in np.linspace(0, 1.0, len(data_files))]
 
@@ -78,7 +49,7 @@ def main():
     energy_cm_all, s_factor_all, s_factor_error_all = [], [], []
     for label, data_file in data_files.items():
 
-        energy_cm, s_factor, s_factor_error = get_data(working_directory + data_file)
+        energy_cm, s_factor, s_factor_error = get_processed_data(path_to_data + data_file)
         energy_cm_sort, s_factor_sort, s_factor_error_sort = sort_data(energy_cm, s_factor, s_factor_error)
         ax.errorbar(energy_cm_sort, s_factor_sort, yerr=s_factor_error_sort, marker="o", lw=0, elinewidth=1,
                     capsize=5, label=label, color=plt_colours[count], markersize=2.5)
@@ -87,9 +58,9 @@ def main():
         s_factor_all += s_factor_sort
         s_factor_error_all += s_factor_error_sort
         count += 1
-
-    energy_cm_all_sort, s_factor_all_sort, s_factor_error_all_sort = sort_data(energy_cm_all, s_factor_all,
-                                                                               s_factor_error_all)
+    #
+    # energy_cm_all_sort, s_factor_all_sort, s_factor_error_all_sort = sort_data(energy_cm_all, s_factor_all,
+    #                                                                            s_factor_error_all)
 
     # ax.errorbar(energy_cm_all_sort, s_factor_all_sort, yerr=s_factor_error_all_sort, marker="o", lw=0,
     #             elinewidth=1, capsize=5, markersize=2.5)
@@ -114,14 +85,14 @@ def main():
     ax.set_ylabel("$S$ [MeV.barn]")
     plt.legend(loc="upper left", frameon=False, fontsize=8)
     plt.tight_layout()
-    plt.savefig("/home/peter/data/pa_data/dd_cross_section_work/dd_pt_s_factor_data_comp.png")
+    # plt.savefig("/home/peter/data/pa_data/dd_cross_section_work/dd_pt_s_factor_data_comp.png")
     plt.show()
 
     # Save data
-    np.savetxt(working_directory + "dd_n3he_s_factor_all_data.csv",
-               np.transpose([energy_cm_all_sort, s_factor_all_sort, s_factor_error_all_sort]),
-               delimiter=", ",
-               header="E_CM [keV], S [MeV.barn], S_error [MeV.barn]")
+    # np.savetxt("~/analysis/personal/dd_cross_section/" + "dd_n3he_s_factor_all_data.csv",
+    #            np.transpose([energy_cm_all_sort, s_factor_all_sort, s_factor_error_all_sort]),
+    #            delimiter=", ",
+    #            header="E_CM [keV], S [MeV.barn], S_error [MeV.barn]")
 
 
 if __name__ == "__main__":
