@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
 import pandas as pd
-from python_code.pysrc.utils.matplotlibrc_setup import set_rc_params
+from PAProcessing.pysrc.utils.plotting import set_rcParams
 
 
 def get_data(path_to_file):
@@ -43,10 +43,10 @@ def sort_data(x_array, y_array, y_error):
 
 def main():
 
-    set_rc_params()
+    set_rcParams()
     _, ax = plt.subplots(figsize=(8, 6))
 
-    working_directory = "/Users/pallan/Documents/dd_cross_section_work/data/dd_n3he/"
+    working_directory = "/home/peter/data/pa_data/dd_cross_section_work/data/dd_n3he/"
 
     data_files = {
                   "Arnold (1954)": "dd_n3he_s_factor_fig13_arnold_data_combined.csv",
@@ -58,7 +58,7 @@ def main():
                   "Preston (1954)": "dd_n3he_s_factor_fig15_preston_data_combined.csv",
                   "Ganeev (1957)": "dd_n3he_s_factor_fig15_ganeev_data_combined.csv",
                   "Casey (2017)": "dd_n3he_s_factor_casey_data_combined.txt",
-                  "Bystritsky (2010)": "dd_n3he_s_factor_Bystritsky_data_combined.csv",
+                  "Bystritsky (2010)": "dd_n3he_s_factor_bystritsky_data_combined.csv",
                   "Greife (1995)": "dd_n3he_s_factor_greife_data_combined.csv",
                   "Schulte (1972)": "dd_n3he_s_factor_fig24_schulte_data_combined.csv",
                   "Hunter (1949)": "dd_n3he_s_factor_fig24_hunter_data_combined.csv",
@@ -90,10 +90,11 @@ def main():
 
     energy_cm_all_sort, s_factor_all_sort, s_factor_error_all_sort = sort_data(energy_cm_all, s_factor_all,
                                                                                s_factor_error_all)
+
     # ax.errorbar(energy_cm_all_sort, s_factor_all_sort, yerr=s_factor_error_all_sort, marker="o", lw=0,
     #             elinewidth=1, capsize=5, markersize=2.5)
-
-    # fit to data
+    #
+    # # fit to data
     # fit_orders = np.arange(2, 6, 1)
     # x_fit = np.linspace(min(energy_cm_all_sort) - 1e3, max(energy_cm_all_sort) + 1e4, 5e3)
     # for fit_order in fit_orders:
@@ -101,17 +102,19 @@ def main():
     #                        w=1/np.array(s_factor_error_all_sort))
     #     y_fit = np.polyval(coefs, x_fit)
     #     ax.plot(x_fit, y_fit)
+    #
+    # plt.show()
 
     # Finish up
     ax.set_xlim(1, 2e4)
     ax.set_ylim(0.025, 2)
     ax.set_xscale("log")
-    # ax.set_yscale("log")
+    ax.set_yscale("log")
     ax.set_xlabel(r"$E_{\mathrm{CM}}$ [keV]")
     ax.set_ylabel("$S$ [MeV.barn]")
     plt.legend(loc="upper left", frameon=False, fontsize=8)
     plt.tight_layout()
-    plt.savefig("/Users/pallan/Documents/dd_cross_section_work/dd_pt_s_factor_data_comp.png")
+    plt.savefig("/home/peter/data/pa_data/dd_cross_section_work/dd_pt_s_factor_data_comp.png")
     plt.show()
 
     # Save data

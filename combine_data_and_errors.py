@@ -30,8 +30,22 @@ def get_data(path_to_file):
 def sort_data(x_array, y_array):
     """
     Function to sort to one array based on order of another
-    Data thief don't click on points in increasing order this will rearrange based on energy
+
+    Parameters
+    ----------
+    x_array: array_like
+        array containing x axis data
+    y_array: array_like
+        array containing y axis data
+
+    Returns
+    -------
+    x_array_sort: ndarray
+        ascending x values
+    y_array_sort: ndarray
+        y values sorted based on x_array
     """
+
     # Could use np.argsort()
     y_array_sort = [x for _, x in sorted(zip(x_array, y_array))]
     x_array_sort = sorted(x_array)
@@ -41,7 +55,7 @@ def sort_data(x_array, y_array):
 
 def main():
 
-    working_directory = "/Users/pallan/Documents/dd_cross_section_work/data/dd_n3he/"
+    working_directory = "/home/peter/data/pa_data/dd_cross_section_work/data/dd_n3he/"
     name = "blair"
     data_file = "dd_n3he_s_factor_fig24_" + name + "_data.csv"
     error_file = "dd_n3he_s_factor_fig24_" + name + "_errors.csv"
