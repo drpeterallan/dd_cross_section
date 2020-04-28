@@ -76,11 +76,11 @@ def sort_data(x_array, y_array, y_error=None):
     y_array_sort: list
         y values sorted based on x_array
     """
-    y_array_sort = [x for _, x in sorted(zip(x_array, y_array))]
-    x_array_sort = sorted(x_array)
+    y_array_sort = np.array([x for _, x in sorted(zip(x_array, y_array))])
+    x_array_sort = np.array(sorted(x_array))
 
     if y_error is not None:
-        y_error_sort = [x for _, x in sorted(zip(x_array, y_error))]
+        y_error_sort = np.array([x for _, x in sorted(zip(x_array, y_error))])
         return x_array_sort, y_array_sort, y_error_sort
     else:
         return x_array_sort, y_array_sort

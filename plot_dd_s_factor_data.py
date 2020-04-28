@@ -54,11 +54,11 @@ def main():
         ax.errorbar(energy_cm_sort, s_factor_sort, yerr=s_factor_error_sort, marker="o", lw=0, elinewidth=1,
                     capsize=5, label=label, color=plt_colours[count], markersize=2.5)
 
-        energy_cm_all += energy_cm_sort
-        s_factor_all += s_factor_sort
-        s_factor_error_all += s_factor_error_sort
+        energy_cm_all = np.append(energy_cm_all, energy_cm_sort)
+        s_factor_all = np.append(s_factor_all, s_factor_sort)
+        s_factor_error_all = np.append(s_factor_error_all, s_factor_error_sort)
         count += 1
-    #
+
     # energy_cm_all_sort, s_factor_all_sort, s_factor_error_all_sort = sort_data(energy_cm_all, s_factor_all,
     #                                                                            s_factor_error_all)
 
