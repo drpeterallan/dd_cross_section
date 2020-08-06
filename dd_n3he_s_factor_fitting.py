@@ -7,18 +7,26 @@ Date: 06/08/2019
 Author: P. Allan
 """
 
-from dd_cross_section.pysrc.utils import get_processed_data
+from dd_cross_section.pysrc.utils import get_processed_data, set_rcParams
 import matplotlib.pyplot as plt
 import numpy as np
 import pymc3 as pm
 import arviz as az
 import multiprocessing as mp
+from scipy.optimize import curve_fit
 
 
-def do_bayesian_fit(x, y, y_error, num_samples=500):
+def pade_func(energy_array, A1, A2, A3, A4, B1, B2, B3, B4):
+    return (A1 + energy_array * (A2 + energy_array * (A3 + energy_array * A4)))\
+           / (1 + energy_array * (B1 + energy_array * (B2 + energy_array * (B3 + energy_array * B4))))
 
-    def pade_func(x_array, A1, A2, A3, A4):
-        return A1 + x_array * (A2 + x_array * (A3 + x_array * A4))
+
+def lsq_fit(func, x, y):
+    coefs, _ = curve_fit(pade_func, x, y)
+    return coefs
+
+
+def bayesian_fit(x, y, y_error, num_samples=500):
 
     with pm.Model() as model:
 
@@ -31,7 +39,7 @@ def do_bayesian_fit(x, y, y_error, num_samples=500):
 
         y_mean = pm.Deterministic("y_mean", pade_func(x, A1, A2, A3, A4))
         # y_pred = pm.Normal("y_pred", mu=y_mean, observed=y)
-        y_pred = pm.Normal("y_pred", mu=y_mean, sd=y_stdev, observed=y)
+        y_pred = pm.Normal("y_pred", mu=y_mean, sd=y_error, observed=y)
         # y_pred = pm.Normal("y_pred", mu=y_mean, tau=1.0/y_error**2, observed=y)
 
         # Do the fitting
@@ -47,7 +55,7 @@ def do_bayesian_fit(x, y, y_error, num_samples=500):
 
     # az.plot_hpd(x, trace["y_mean"], credible_interval=0.95)
 
-    ppc = pm.sample_posterior_predictive(trace, samples=200, model=model)
+    ppc = pm.sample_posterior_predictive(trace, samples=500, model=model)
     sample = ppc["y_pred"]
 
     y_fit_min = np.percentile(sample, 2.5, axis=0)
@@ -63,18 +71,31 @@ def run():
     path_to_data = "./data/processed/dd_n3he/dd_n3he_s_factor_all_data.csv"
     energy, s_factor, s_factor_error = get_processed_data(path_to_data)
 
-    # Do Bayesian fitting
-    y_fit, y_fit_min, y_fit_max = do_bayesian_fit(energy, s_factor, s_factor_error, num_samples=2000)
-    plt.plot(energy, y_fit, "r-", lw=2)
-    plt.plot(energy, y_fit_min, "r--", lw=1)
-    plt.plot(energy, y_fit_max, "r--", lw=1)
-    plt.errorbar(energy, s_factor, yerr=s_factor_error, marker="o", color="b", elinewidth=1, linewidth=0,
-                 markersize=0.5)
+    set_rcParams()
+    _, ax = plt.subplots(figsize=(8, 6))
+    ax.errorbar(energy, s_factor, yerr=s_factor_error,
+                marker="o", color="b", elinewidth=1, linewidth=0, markersize=2, zorder=0)
 
-    plt.xlim(1, 1e4)
-    plt.ylim(0.02, 1)
-    plt.xscale("log")
-    plt.yscale("log")
+    # Least-squares fit
+    coefs = lsq_fit(pade_func, energy, s_factor)
+    energy_fit = np.arange(0.8 * min(energy), 2 * max(energy), 1)
+    s_factor_fit = pade_func(energy_fit, *coefs)
+    plt.plot(energy_fit, s_factor_fit, "r-")
+
+    # Do Bayesian fitting
+    # y_fit, y_fit_min, y_fit_max = bayesian_fit(energy, s_factor, s_factor_error, num_samples=2000)
+    # plt.plot(energy, y_fit, "r-", lw=2)
+    # plt.plot(energy, y_fit_min, "r--", lw=1)
+    # plt.plot(energy, y_fit_max, "r--", lw=1)
+
+    ax.set_xlim(1, 2e4)
+    ax.set_ylim(0.025, 4)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel(r"$E_{\mathrm{CM}}$ [keV]")
+    ax.set_ylabel("$S$ [MeV.barn]")
+    plt.legend(loc="upper left", frameon=False, fontsize=8)
+    plt.tight_layout()
     plt.show()
 
 
