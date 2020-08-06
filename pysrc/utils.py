@@ -6,11 +6,12 @@ utils.py
 Generic functions for reading and processing etc.
 
 Date: 28/04/2020
-
+Author: P. Allan
 """
 
 import pandas as pd
 import numpy as np
+from matplotlib import rcParams
 
 
 def get_wpd_data(path_to_file):
@@ -84,3 +85,23 @@ def sort_data(x_array, y_array, y_error=None):
         return x_array_sort, y_array_sort, y_error_sort
     else:
         return x_array_sort, y_array_sort
+
+
+def set_rcParams():
+    """
+    Set default plotting formats
+    """
+
+    rcParams.update({"font.size": 13,
+                     "font.family": "sans-serif",
+                     "lines.linewidth": 1.5,
+                     "xtick.labelsize": 13,
+                     "xtick.major.size": 5,
+                     "xtick.major.width": 1,
+                     "xtick.major.pad": 10,
+                     "ytick.labelsize": 13,
+                     "ytick.major.size": 5,
+                     "ytick.major.width": 1,
+                     "image.cmap": "jet",
+                     "savefig.dpi": "300"
+                     })

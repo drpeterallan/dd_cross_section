@@ -1,37 +1,21 @@
 """
-----------------------
+------------------------
 dd_n3he_s_factor_fitting
-----------------------
+------------------------
 
-Script to use Bayesian linear regression to fit the S-factor data for the d + d --> n + 3He
+Script to use Bayesian regression to fit the S-factor data for the d + d --> n + 3He reaction
 
-:Date: 06/08/2019
+Date: 06/08/2019
+Author: P. Allan
 """
 
+from dd_cross_section.pysrc.utils import get_processed_data
 import matplotlib.pyplot as plt
 import numpy as np
 import pymc3 as pm
 import arviz as az
-import pandas as pd
 import multiprocessing as mp
-from scipy.optimize import curve_fit
-
-
-def get_data(path_to_file):
-    data = pd.read_csv(path_to_file, header=0, delimiter=",")
-    energy = np.array(data.iloc[:, 0].values)
-    s_factor = np.array(data.iloc[:, 1].values)
-    s_factor_error = np.array(data.iloc[:, 2].values)
-    return energy, s_factor, s_factor_error
-
-
-# def do_lsq_fit(x, y, y_error):
-#
-#     coefs, _ = curve_fit(pade_func, x, y, sigma=y_error, absolute_sigma=True)
-#     x_fit = np.logspace(-1, 6, 1000)
-#     y_fit = pade_func(x_fit, coefs[0], coefs[1], coefs[2], coefs[3], coefs[4])
-#
-#     return x_fit, y_fit
+import os
 
 
 def do_bayesian_fit(x, y, y_error, num_samples=500):
@@ -79,18 +63,14 @@ def do_bayesian_fit(x, y, y_error, num_samples=500):
 def run():
 
     # Get data
-    path_to_data = "/Users/pallan/Documents/dd_cross_section_work/data/dd_n3he/dd_n3he_s_factor_all_data.csv"
-    energy, s_factor, s_factor_error = get_data(path_to_data)
+    path_to_data = "./data/processed/dd_n3he/dd_n3he_s_factor_all_data.csv"
+    energy, s_factor, s_factor_error = get_processed_data(path_to_data)
 
     # Do Bayesian fitting
-    y_fit, y_fit_min, y_fit_max = do_bayesian_fit(energy, s_factor, s_factor_error, num_samples=2000)
+    y_fit, y_fit_min, y_fit_max = do_bayesian_fit(energy, s_factor, s_factor_error, num_samples=500)
     plt.plot(energy, y_fit, "r-", lw=2)
     plt.plot(energy, y_fit_min, "r--", lw=2)
     plt.plot(energy, y_fit_max, "r--", lw=2)
-
-    # x_fit, y_fit = do_lsq_fit(energy, s_factor, s_factor_error)
-    # plt.plot(x_fit, y_fit)
-
     plt.errorbar(energy, s_factor, yerr=s_factor_error, marker="o", color="b", elinewidth=1, linewidth=0,
                  markersize=0.5)
 
