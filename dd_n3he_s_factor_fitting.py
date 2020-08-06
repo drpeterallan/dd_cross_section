@@ -3,8 +3,6 @@
 dd_n3he_s_factor_fitting
 ------------------------
 
-Script to use Bayesian regression to fit the S-factor data for the d + d --> n + 3He reaction
-
 Date: 06/08/2019
 Author: P. Allan
 """
@@ -15,7 +13,6 @@ import numpy as np
 import pymc3 as pm
 import arviz as az
 import multiprocessing as mp
-import os
 
 
 def do_bayesian_fit(x, y, y_error, num_samples=500):
@@ -67,10 +64,10 @@ def run():
     energy, s_factor, s_factor_error = get_processed_data(path_to_data)
 
     # Do Bayesian fitting
-    y_fit, y_fit_min, y_fit_max = do_bayesian_fit(energy, s_factor, s_factor_error, num_samples=500)
+    y_fit, y_fit_min, y_fit_max = do_bayesian_fit(energy, s_factor, s_factor_error, num_samples=2000)
     plt.plot(energy, y_fit, "r-", lw=2)
-    plt.plot(energy, y_fit_min, "r--", lw=2)
-    plt.plot(energy, y_fit_max, "r--", lw=2)
+    plt.plot(energy, y_fit_min, "r--", lw=1)
+    plt.plot(energy, y_fit_max, "r--", lw=1)
     plt.errorbar(energy, s_factor, yerr=s_factor_error, marker="o", color="b", elinewidth=1, linewidth=0,
                  markersize=0.5)
 
